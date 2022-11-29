@@ -97,6 +97,9 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
+#and unuseable files(for our project)
+*.sln
+*.dll
 
 # Chutzpah Test files
 _Chutzpah*

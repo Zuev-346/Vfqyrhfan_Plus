@@ -100,6 +100,8 @@ StyleCopReport.xml
 #and unuseable files(for our project)
 *.sln
 *.dll
+*.filter
+*.vcxproj
 
 # Chutzpah Test files
 _Chutzpah*

@@ -137,7 +137,8 @@ double set_coords_d_from_di_func(double dx, double dy, double dz)
 {
 	return sqrt(dx * dx + dy * dy + dz * dz);
 };
-std::vector<double> new_di_in_new_pos_func(double vec_1_x, double vec_1_y, double vec_1_z, double vector_nul_x, double vector_nul_y, double vector_nul_z)
+std::vector<double> new_di_in_new_pos_func(double vec_1_x, double vec_1_y, double vec_1_z,
+	double vector_nul_x, double vector_nul_y, double vector_nul_z)
 /*
 Векторная разность
 */
@@ -150,19 +151,61 @@ std::vector<double> new_di_in_new_pos_func(double vec_1_x, double vec_1_y, doubl
 	return temp;
 
 }
-std::vector<double> from_world_to_screen(double self_x, double self_y, double self_z, double vector_nul_x, double vector_nul_y, double vector_nul_z,
-	double vector_nul_d, std::vector<double> trigonometry, std::vector<double> screen_size)
+
+
+
+std::vector<double> find_projected_vector(double self_dx, double self_dy, double self_dz, double self_d, double vector_nul_dx,
+	double vector_nul_dy, double vector_nul_dz, double vector_nul_d)
 	/*
-	Функция проецирования точки на камеру(точка в абсолютных координатах)
+	Укорачивание вектора до камеры и проверка видимости
 	*/
 {
-	std::vector<double> temp = new_di_in_new_pos_func(self_x, self_y, self_z, vector_nul_x, vector_nul_y, vector_nul_z);
-	double self_dx = temp[0];
-	double self_dy = temp[1];
-	double self_dz = temp[2];
-	return from_relative_to_screen(self_dx, self_dy, self_dz, vector_nul_d, trigonometry, screen_size);
-
+	double aspect_ratio = (self_dx * vector_nul_dx + self_dy * vector_nul_dy + self_dz * vector_nul_dz) / (vector_nul_d);
+	double cos_cam_point = aspect_ratio / self_d;
+	aspect_ratio /= vector_nul_d;
+	double angle_of_view = 0.3;
+	//TO-DO: move to vocabulary
+	if (cos_cam_point > angle_of_view)
+	{
+		double dx = self_dx / aspect_ratio - vector_nul_dx;
+		double dy = self_dy / aspect_ratio - vector_nul_dy;
+		double dz = self_dz / aspect_ratio - vector_nul_dz;
+		std::vector<double> temp = { dx, dy, dz, cos_cam_point, aspect_ratio, 1 };
+		//1==true
+		return temp;
+	}
+	else
+	{
+		std::vector<double> temp = { 0, 0, 0, cos_cam_point, aspect_ratio, 0 };
+		//0 == false
+		return temp;
+	}
 }
+
+
+std::vector<double> set_coords_di_from_d(double vector_nul_d, std::vector<double> trigonometry)
+/*
+Переход из полярных координат
+*/
+{
+	std::vector<double> temp = { vector_nul_d * trigonometry[1] * trigonometry[3],
+		vector_nul_d * trigonometry[0] * trigonometry[3], vector_nul_d * trigonometry[2] };
+	return temp;
+}
+
+std::vector<double> transformation_to_screen(double dx, double dy, double dz, std::vector<double> trigonometry)
+/*
+Преобразование координат в вид, соответствующий отрисовке пайгейма
+*/
+
+{
+	std::vector<double> temp = { dx * trigonometry[1] + dy * trigonometry[0], -dx * trigonometry[0] + dy * trigonometry[1] };
+	temp.push_back(-temp[0] * trigonometry[2] + dz * trigonometry[3]);
+	std::vector<double> temp_1 = { (-1.0f * temp[1]), (temp[2]) };
+	return temp_1;
+}
+
+
 std::vector<double> from_relative_to_screen(double self_dx, double self_dy, double self_dz, double vector_nul_d, std::vector<double> trigonometry,
 	std::vector<double> screen_size)
 	/*
@@ -191,67 +234,32 @@ std::vector<double> from_relative_to_screen(double self_dx, double self_dy, doub
 		double width = screen_size[0];
 		double height = screen_size[1];
 		std::vector<double> temp_3 = { width * (dx / 2 / vector_nul_d + 1 / 2),
-			height * (1 - (dz / 2 * sqrt(3) / vector_nul_d + 1 / 2)), 1};
+			height * (1 - (dz / 2 * sqrt(3) / vector_nul_d + 1 / 2)), 1 };
 		//1 == true
 		return temp_3;
 	}
 	else
 	{
-		std::vector<double> temp_4 = { -10, -10, 0};
+		std::vector<double> temp_4 = { -10, -10, 0 };
 		//0 == false
 		return temp_4;
 	};
 }
 
-std::vector<double> transformation_to_screen(double dx, double dy, double dz, std::vector<double> trigonometry)
-/*
-Преобразование координат в вид, соответствующий отрисовке пайгейма
-*/
-
-{
-	std::vector<double> temp = { dx * trigonometry[1] + dy * trigonometry[0], -dx * trigonometry[0] + dy * trigonometry[1] };
-	temp.push_back(-temp[0] * trigonometry[2] + dz * trigonometry[3]);
-	std::vector<double> temp_1 = { (-1.0f * temp[1]), (temp[2]) };
-	return temp_1;
-}
-
-std::vector<double> set_coords_di_from_d(double vector_nul_d, std::vector<double> trigonometry)
-/*
-Переход из полярных координат
-*/
-{
-	std::vector<double> temp = { vector_nul_d * trigonometry[1] * trigonometry[3],
-		vector_nul_d * trigonometry[0] * trigonometry[3], vector_nul_d * trigonometry[2] };
-	return temp;
-}
-
-std::vector<double> find_projected_vector(double self_dx, double self_dy, double self_dz, double self_d, double vector_nul_dx,
-	double vector_nul_dy, double vector_nul_dz, double vector_nul_d)
+std::vector<double> from_world_to_screen(double self_x, double self_y, double self_z, double vector_nul_x, double vector_nul_y, double vector_nul_z,
+	double vector_nul_d, std::vector<double> trigonometry, std::vector<double> screen_size)
 	/*
-	Укорачивание вектора до камеры и проверка видимости
+	Функция проецирования точки на камеру(точка в абсолютных координатах)
 	*/
 {
-	double aspect_ratio = (self_dx * vector_nul_dx + self_dy * vector_nul_dy + self_dz * vector_nul_dz) / (vector_nul_d);
-	double cos_cam_point = aspect_ratio / self_d;
-	aspect_ratio /= vector_nul_d;
-	double angle_of_view = 0.3;
-	//TO-DO: move to vocabulary
-	if (cos_cam_point > angle_of_view)
-	{
-		double dx = self_dx / aspect_ratio - vector_nul_dx;
-		double dy = self_dy / aspect_ratio - vector_nul_dy;
-		double dz = self_dz / aspect_ratio - vector_nul_dz;
-		std::vector<double> temp = { dx, dy, dz, cos_cam_point, aspect_ratio, 1 };
-		//1==true
-		return temp;
-	}
-	else
-	{
-		std::vector<double> temp = { 0, 0, 0, cos_cam_point, aspect_ratio, 0};
-		//0 == false
-		return temp;
-	}
+	std::vector<double> temp = new_di_in_new_pos_func(self_x, self_y, self_z, vector_nul_x, vector_nul_y, vector_nul_z);
+	double self_dx = temp[0];
+	double self_dy = temp[1];
+	double self_dz = temp[2];
+	return from_relative_to_screen(self_dx, self_dy, self_dz, vector_nul_d, trigonometry, screen_size);
+
 }
+
 
 double get_angle_cos_func(double dx, double dy, double dz, double d, double vector_nul_dx,
 	double vector_nul_dy, double vector_nul_dz, double vector_nul_d)
@@ -261,20 +269,6 @@ double get_angle_cos_func(double dx, double dy, double dz, double d, double vect
 {
 	return scalar_func(dx, dy, dz, vector_nul_dx, vector_nul_dy, vector_nul_dz) / (d * vector_nul_d);
 }
-
-std::vector<double> new_di_in_new_pos_func(double self_x, double self_y, double self_z,
-	double vector_nul_x, double vector_nul_y, double vector_nul_z)
-	/*
-	Векторное вычитаение
-	*/
-{
-	double self_dx = -vector_nul_x + self_x;
-	double self_dy = -vector_nul_y + self_y;
-	double self_dz = -vector_nul_z + self_z;
-	std::vector<double> temp = { self_dx, self_dy, self_dz };
-	return temp;
-}
-
 
 
 /*

@@ -5,27 +5,76 @@
 
 #define M_PI  3.14159265358979323846
 
+const int WIDTH = 1400;
+const int HEIGHT = 750;
+std::vector<int> screen_size = { WIDTH, HEIGHT };
+
+
+sf::Color const AIR(50, 150, 50, 0);
+sf::Color const RED(255, 0, 0, 0);
+sf::Color const BLUE(0, 0, 255, 0);
+sf::Color const YELLOW(255, 255, 0, 0);
+sf::Color const GREEN(0, 255, 0, 0);
+sf::Color const MAGENTA(255, 0, 255, 0);
+sf::Color const CYAN(0, 255, 255, 0);
+sf::Color const BLACK(0, 0, 0, 0);
+sf::Color const WHITE(255, 255, 255, 0);
+sf::Color const GREY1(180, 180, 180, 0);
+sf::Color const BACKGROUND(180, 180, 180, 0);
+
+std::vector<std::vector<int>> order_of_tuk = {std::vector<int>{0, 0, 0},std::vector<int>{0, 0, 2},std::vector<int>{0, 2, 0},std::vector<int>{0, 2, 2},std::vector<int>{2, 0, 0},std::vector<int>{2, 0, 2},std::vector<int>{2, 2, 0},std::vector<int>{2, 2, 2},std::vector<int>{0, 0, 1},std::vector<int>{0, 1, 0},std::vector<int>{0, 1, 2},std::vector<int>{0, 2, 1},std::vector<int>{1, 0, 0},std::vector<int>{1, 0, 2},std::vector<int>{1, 2, 0},std::vector<int>{1, 2, 2},std::vector<int>{2, 0, 1},std::vector<int>{2, 1, 0},std::vector<int>{2, 1, 2},std::vector<int>{2, 2, 1},std::vector<int>{0, 1, 1},std::vector<int>{1, 0, 1},std::vector<int>{1, 1, 0},std::vector<int>{1, 1, 2},std::vector<int>{1, 2, 1},std::vector<int>{2, 1, 1}};
+
+
+sf::Color get_color(int id)
+/*
+    return: цвет
+*/
+{
+    if (id == 0)
+        return AIR;
+    if (id == 1)
+        return WHITE;
+    if (id == 2)
+        return BLACK;
+    if (id == 3)
+        return RED;
+    if (id == 4)
+        return GREEN;
+    if (id == 5)
+        return BLUE;
+    if (id == 6)
+        return CYAN;
+    if (id == 7)
+        return MAGENTA;
+    if (id == 8)
+        return YELLOW;
+    std::cout << "Get_color error!";
+    abort();
+    return sf::Color::Black;
+}
 
 // New begining
 double scalar_func(double dx, double dy, double dz, double vector_nul_dx, double vector_nul_dy, double vector_nul_dz)
 /*
-Скалярное произведение двух векторов по составляющим
+    Скалярное произведение двух векторов по составляющим
 */
 {
     return dx * vector_nul_dx + dy * vector_nul_dy + dz * vector_nul_dz;
 };
+
 double set_coords_d_from_di_func(double dx, double dy, double dz)
 /*
-Определение длины вектора
+    Определение длины вектора
 */
 {
     return sqrt(dx * dx + dy * dy + dz * dz);
 };
+
 std::vector<double> new_di_in_new_pos_func(double vec_1_x, double vec_1_y, double vec_1_z,
     double vector_nul_x, double vector_nul_y, double vector_nul_z)
-    /*
+/*
     Векторная разность
-    */
+*/
 {
 
     double dx = -vector_nul_x + vec_1_x;
@@ -35,8 +84,6 @@ std::vector<double> new_di_in_new_pos_func(double vec_1_x, double vec_1_y, doubl
     return temp;
 
 }
-
-
 
 std::vector<double> find_projected_vector(double self_dx, double self_dy, double self_dz, double self_d, double vector_nul_dx,
     double vector_nul_dy, double vector_nul_dz, double vector_nul_d)
@@ -66,7 +113,6 @@ std::vector<double> find_projected_vector(double self_dx, double self_dy, double
     }
 }
 
-
 std::vector<double> set_coords_di_from_d(double vector_nul_d, std::vector<double> trigonometry)
 /*
 Переход из полярных координат
@@ -89,9 +135,8 @@ std::vector<double> transformation_to_screen(double dx, double dy, double dz, st
     return temp_1;
 }
 
-
 std::vector<double> from_relative_to_screen(double self_dx, double self_dy, double self_dz, double vector_nul_d, std::vector<double> trigonometry,
-    std::vector<double> screen_size)
+    std::vector<int> screen_size)
     /*
     Функция проецирования точки на камеру(точка в относительных координатах)
     */
@@ -131,7 +176,7 @@ std::vector<double> from_relative_to_screen(double self_dx, double self_dy, doub
 }
 
 std::vector<double> from_world_to_screen(double self_x, double self_y, double self_z, double vector_nul_x, double vector_nul_y, double vector_nul_z,
-    double vector_nul_d, std::vector<double> trigonometry, std::vector<double> screen_size)
+    double vector_nul_d, std::vector<double> trigonometry, std::vector<int> screen_size)
     /*
     Функция проецирования точки на камеру(точка в абсолютных координатах)
     */
@@ -192,14 +237,32 @@ public:
     double dz;
     double an_xy;
     double an_xz;
-    std::vector<double>trigonometry_array;
-    std::vector<double>screen_size;
-    Vector() {};
-    Vector(double x0, double y0, double z0, double d0, double dx0, double dy0, double dz0,
-        double an_xy0, double an_xz0, std::vector<double> screen_size0)
+    // an_xy_sin, an_xy_cos, an_xz_sin, an_xz_cos
+    std::vector<double>trigonometry_array = { 0, 1, 0, 1 };
+    std::vector<int>screen_size;
+    Vector() {
+    };
+    Vector(double x0, double y0, double z0, std::vector<int> screen_size0)
         /*
         инициализирует объект класса вектор
         */
+    {
+        d = 0;
+        x = x0;
+        y = y0;
+        z = z0;
+        dx = 0;
+        dy = 0;
+        dz = 0;
+        an_xy = 0;
+        an_xz = 0;
+        screen_size = screen_size0;
+    }
+    Vector(double x0, double y0, double z0, double d0, double dx0, double dy0, double dz0,
+        double an_xy0, double an_xz0, std::vector<int> screen_size0)
+    /*
+        инициализирует объект класса вектор
+    */
     {
         d = d0;
         x = x0;
@@ -211,15 +274,13 @@ public:
         an_xy = an_xy0;
         an_xz = an_xz0;
         screen_size = screen_size0;
-        // an_xy_sin, an_xy_cos, an_xz_sin, an_xz_cos
-        std::vector<double>trigonometry_array = { 0, 1, 0, 1 };
     }
 
     Vector from_polar(double x, double y, double z, double lng, double lat, double r)
-        /*
+    /*
         задаёт относительные координаты из полярных координат
         return: vector с посчитанными относительными координатами
-        */
+    */
     {
         Vector vector(x, y, z, r, 0, 0, 0, lng, lat, screen_size);
         vector.set_coords_di_from_d_method();
@@ -227,15 +288,12 @@ public:
     }
 
     void set_coords_di_from_d_method()
-        /*
+    /*
         задаёт относительные координаты из полярных координат
         return:None
-        */
+    */
     {
-        trigonometry_array.push_back(sin(an_xy));
-        trigonometry_array.push_back(cos(an_xy));
-        trigonometry_array.push_back(sin(an_xz));
-        trigonometry_array.push_back(cos(an_xz));
+        trigonometry_array = std::vector<double>{ sin(an_xy), cos(an_xy), sin(an_xz), cos(an_xz) };
         std::vector<double> temp = set_coords_di_from_d(d, trigonometry_array);
         dx = temp[0];
         dy = temp[1];
@@ -243,11 +301,11 @@ public:
     }
 
     void new_di_in_new_pos_method(Vector vector_nul)
-        /*
+    /*
         задаёт относительные координаты между двумя точками
         vector_nul: второй вектор
         return: None
-        */
+    */
     {
         dx = -vector_nul.x + x;
         dy = -vector_nul.y + y;
@@ -255,11 +313,11 @@ public:
     }
 
     std::vector<double> from_world_to_screen(Vector vector_nul)
-        /*
+    /*
         выдаёт координаты на экране из абсолютных координат в мире
         vector_nul: точка, которую требуется отрисовать
         return: x, y точки
-        */
+    */
     {
         new_di_in_new_pos_method(vector_nul);
         std::vector<double> temp = from_relative_to_screen(dx, dy, dz, vector_nul.d,
@@ -268,19 +326,19 @@ public:
     }
 
     void set_coords_d_from_di()
-        /*
+    /*
         устанавливает d посредством di
-        */
+    */
     {
         d = sqrt(dx * dx + dy * dy + dz * dz);
     }
 
     double scalar(Vector vector_nul)
-        /*
+    /*
         считает скалярное произведение между веторами
         vector_nul:
         return: scalar
-        */
+    */
     {
         return dx * vector_nul.dx + dy * vector_nul.dy + dz * vector_nul.dz;
     }
@@ -332,30 +390,32 @@ public:
     }
 };
 
+std::vector<std::vector<std::vector<char>>> generate_emp(int a, int b, int c)
+/*
+создаёт начальную карту, в которой в последующем будут храниться блоки
+*/
+{
+    std::vector<std::vector<std::vector<char>>> arr(a, std::vector<std::vector<char>>(b, std::vector<char>(c, 0)));
+    return arr;
+};
 
 class Scene
 {
 public:
-    std::vector<std::vector<std::vector<int>>> map;
-    Scene();
-    ~Scene();
-    void dest_block(std::vector<std::vector<int>>fat) {};
-    void add_block(std::vector<std::vector<int>>fat, int color) {};
+    
+    //std::vector<std::vector<std::vector<char>>> map;
+    Scene()
+    {
+        //map = generate_emp(100, 100, 100);
+    };
+    ~Scene() {};
+    void dest_block(std::vector<int>fat) {};
+    void add_block(std::vector<int>fat, int color) {};
 private:
 
 };
 
-Scene::Scene()
-{
-}
-
-Scene::~Scene()
-{
-}
-
-
-
-std::vector<std::vector<int>> cut(Scene scene, std::vector<std::vector<int>> order, Vector camera, int d, int h)
+//std::vector<std::vector<int>> cut(Scene scene, std::vector<std::vector<int>> order, Vector camera, int d, int h)
 /*
 выдаёт нужный порядок отрисовки кубов
 order: массив из блоков с относительной координатой, хранится order_of_output.py
@@ -365,16 +425,16 @@ d: диаметр отрисовки блоков
 h: высота отрисовки блоков
 return: массив в нужном порядке отрисовки блоков
 */
-{
+/*{
     std::vector<std::vector<int>> t_o;
     for (std::vector<int> item : order)
     {
         int x = item[0];
         int y = item[1];
         int z = item[2];
-        x += int(camera.x + 0.5) - int(d / 2);
-        y += int(camera.y + 0.5) - int(d / 2);
-        z += int(camera.z + 0.5) - int(h / 2);
+        x += static_cast<int>(camera.x + 0.5) - static_cast<int>(d / 2);
+        y += static_cast<int>(camera.y + 0.5) - static_cast<int>(d / 2);
+        z += static_cast<int>(camera.z + 0.5) - static_cast<int>(h / 2);
         if (scene.map[x][y][z])
         {
             std::vector<int>temp = { x, y, z };
@@ -382,16 +442,20 @@ return: массив в нужном порядке отрисовки блок�
         }
     }
     return t_o;
-}
+}*/
 
-std::vector<int> check_distance(Scene scene, Vector cam, std::vector<std::vector<int>> order, int grnd)
+//std::vector<int> check_distance(Scene scene, Vector cam, std::vector<std::vector<int>> order, int grnd)
 /*
 проверяет нахождение блоков поблизости в кубе 3х3, возвращает 6 чисел в формате,
 какую компоненту скорости нужно убить
 return: [0,0,1,0,0,1]
 */
-{
+/*{
     std::vector<int> ret = { 0, 0, 0, 0, 0, 0 };
+    std::cout << "chesk_dist" << std::endl;
+    std::cout << "cam.x: " << std::to_string(cam.x) << std::endl;
+    std::cout << "cam.y: " << std::to_string(cam.y) << std::endl;
+    std::cout << "cam.z: " << std::to_string(cam.z) << std::endl;
     for (std::vector<int>item : cut(scene, order, cam, 3, 3))
     {
         double dx = item[0] - cam.x;
@@ -480,13 +544,14 @@ return: [0,0,1,0,0,1]
     if (cam.z >= 19)
         ret[2] += 1;
     return ret;
-};
-
+};*/
 
 class Player
 {
 public:
-    std::vector<double> r, v, a;
+    std::vector<double> r{50,50,50};
+    std::vector<double> v{0,0,0};
+    std::vector<double> a{0,0,0};
     std::vector<int>screen_size;
     Vector cam;
     double lng = 0;// longitude;
@@ -494,8 +559,8 @@ public:
     int n = 8;
     int g = 9;
     //Что это? Дальность выбора кубика?
-    double fly_mode = 1;
-    double test_mode = .0f;
+    bool fly_mode = 1;
+    bool test_mode = false;
     int color = 4;
 
     double leg_force = 0.01;
@@ -510,48 +575,64 @@ public:
     std::vector<sf::Keyboard::Key> pressed_keys;
     //1 == true
     //TO-DO: move to vocabulary
-    Player(){};
+    Player(){
+        screen_size = std::vector<int>{ 1600,900 };
+        cam = Vector(r[0], r[1], r[2], screen_size);
+        std::cout << "Player_init_1" << std::endl;
+        std::cout << "cam.x: " << std::to_string(cam.x) << std::endl;
+        std::cout << "cam.y: " << std::to_string(cam.y) << std::endl;
+        std::cout << "cam.z: " << std::to_string(cam.z) << std::endl;
+    };
     Player(std::vector<int> screen_size0)
     {
-        r = std::vector<double>{ 0, 0, 0 };
         screen_size = screen_size0;
+        cam = Vector(r[0], r[1], r[2], screen_size);
+        std::cout << "Player_init_2" << std::endl;
+        std::cout << "cam.x: " << std::to_string(cam.x) << std::endl;
+        std::cout << "cam.y: " << std::to_string(cam.y) << std::endl;
+        std::cout << "cam.z: " << std::to_string(cam.z) << std::endl;
     };
     Player(std::vector<double> point, std::vector<int> screen_size0)
-        /*
-            инициализирует игрока,
-            longitude - долгота угла
-            latitude - широта угла
-            points: начальное положение
-            g: ускорение свободного падения
-            screen_size: размер экрана
-        */
+    /*
+        инициализирует игрока,
+        longitude - долгота угла
+        latitude - широта угла
+        points: начальное положение
+        g: ускорение свободного падения
+        screen_size: размер экрана
+    */
     {
         r = point;
         screen_size = screen_size0;
+        cam = Vector(r[0], r[1], r[2], screen_size);
+        std::cout << "Player_init_3" << std::endl;
+        std::cout << "cam.x: " << std::to_string(cam.x) << std::endl;
+        std::cout << "cam.y: " << std::to_string(cam.y) << std::endl;
+        std::cout << "cam.z: " << std::to_string(cam.z) << std::endl;
     }
     ~Player() {};
 
     Vector get_camera()
-        /*
-            return: возвращает вектор евклидовых координат из полярных координат
-        */
+    /*
+        return: возвращает вектор евклидовых координат из полярных координат
+    */
     {
         cam.from_polar(r[0], r[1], r[2], lng, lat, 0.1);
         return cam;
     }
     //
 
-    double update(sf::Event event, Scene scene, std::vector<std::vector<int>>fat)
-        //TO-DO: find real "fat" type
-        /*
-            обновляет конфигурацию нажатых клавиш и перемещает угол взгляда игрока посредством измерения перемещения мыши,
-            отвечает за обработку событий и распределяет задачи между методами по обработке событий
-            event: пайгеймовское событие
-            scene: хранит массив блоков и их цвета
-            fat: хранит информацию о выделенном кубе
-            return: 1
-            //true == 1, если игрок поставил/убрал куб
-        */
+    double update( sf::Event event, Scene scene, std::vector<int>fat)
+    //TO-DO: find real "fat" type
+    /*
+        обновляет конфигурацию нажатых клавиш и перемещает угол взгляда игрока посредством измерения перемещения мыши,
+        отвечает за обработку событий и распределяет задачи между методами по обработке событий
+        event: пайгеймовское событие
+        scene: хранит массив блоков и их цвета
+        fat: хранит информацию о выделенном кубе
+        return: 1
+        //true == 1, если игрок поставил/убрал куб
+    */
     {
         double const_1 = 0;
         //false == 0
@@ -582,6 +663,7 @@ public:
             scene.add_block(fat, color);
             const_1 = 1;
             //true == 1
+            r[0] += 10.f;
         }
         
         if (event.type == sf::Event::MouseWheelScrolled)
@@ -598,8 +680,7 @@ public:
             double temp_x = -k * (mx - screen_size[0] / 2.f);
             double temp_y = k * (my - screen_size[1] / 2.f);
 
-            sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(screen_size[0] / 2.0f), static_cast<int>(screen_size[1] / 2.0f)));
-
+            
             lng = std::fmod((lng + temp_x + M_PI), (M_PI * 2)) - M_PI;
             lat = (lat - temp_y);
             if (lat > M_PI/2)
@@ -629,6 +710,9 @@ public:
             return: None
         */
     {
+
+        std::cout << "move_beginning" << std::endl;
+
         double v_horizontal = sqrt(v[0] * v[0] + v[1] * v[1]);
         if (v_horizontal > speed_limit_min)
         {
@@ -649,32 +733,40 @@ public:
         {
             if (key == sf::Keyboard::D)
             {
+                std::cout << "pressed_keys_D: " << "D" << std::endl;
                 a[0] += +leg_force * sin(lng);
                 a[1] += -leg_force * cos(lng);
             }
             else if (key == sf::Keyboard::A)
             {
+                std::cout << "pressed_keys_A: " << "A" << std::endl;
                 a[0] += -leg_force * sin(lng);
                 a[1] += +leg_force * cos(lng);
             }
             else if (key == sf::Keyboard::S)
             {
+                std::cout << "pressed_keys_S: " << "S" << std::endl;
                 a[0] += -leg_force * cos(lng);
                 a[1] += -leg_force * sin(lng);
             }
             else if (key == sf::Keyboard::W)
             {
+                std::cout << "pressed_keys_W: " << "W" << std::endl;
                 a[0] += +leg_force * cos(lng);
                 a[1] += +leg_force * sin(lng);
             }
             else if (key == sf::Keyboard::Space and fly_mode)
+            {
+
+                std::cout << "pressed_keys_Space+flymode: " << "Space+flymode" << std::endl;
                 /*if (pygame.key.get_mods() & pygame.KMOD_LSHIFT)
                     a[2] += -leg_force;
                 else
                     a[2] += +leg_force;*/
                 if (true)
                     a[2] += -leg_force;
-            //TO-DO: Port it into cpp in future
+                //TO-DO: Port it into cpp in future
+            }
         }
         if (not fly_mode)
             a[2] = g;
@@ -695,14 +787,14 @@ public:
         if (abs(v[2]) <= speed_limit_min)
             v[2] = 0;
 
-        check_tuk(order, ground, scene);
+        //check_tuk(order, ground, scene);
         std::vector<double> temp = { r[0] + v[0], r[1] + v[1], r[2] + v[2] };
         r = temp;
         std::vector<double> temp_1 = { v[0] + a[0], v[1] + a[1], v[2] + a[2] };
         v = temp_1;
     };
     //
-    void check_tuk(std::vector<std::vector<int>> order, int ground, Scene scene)
+    //void check_tuk(std::vector<std::vector<int>> order, int ground, Scene scene)
         /*
         Проверяет нахождение поблизости блоков и изменяет вектор скорости для того, чтобы нельзя было к ним приближаться
         order: соседние блоки в относительных координатах
@@ -710,7 +802,12 @@ public:
         scene: хранит массив блоков и их цвета
         return: None
         */
-    {
+    /*{
+
+        std::cout << "chesk_tuk" << std::endl;
+        std::cout << "cam.x: " << std::to_string(cam.x) << std::endl;
+        std::cout << "cam.y: " << std::to_string(cam.y) << std::endl;
+        std::cout << "cam.z: " << std::to_string(cam.z) << std::endl;
         std::vector<int> ret = check_distance(scene, cam, order, ground);
         if (ret[0] and v[0] >= 0)
         {
@@ -742,7 +839,8 @@ public:
             v[2] = 0;
             r[2] += 0.001;
         }
-    }
+    }*/
+    
     //
     void jump()
         /*
@@ -773,21 +871,39 @@ public:
     //
 };
 
+class Rasterizer
+{
+public:
+
+    std::vector<int> fat;
+    Rasterizer() {};
+    ~Rasterizer() {};
+
+private:
+
+};
+
 class Game
 {
 public:
-	const int FPS = 60;
+	const int FPS = 5;
 	const double gravity = -0.003f;
 	const int ground = 9;
-	std::vector<int> screen_size;
-	Player Steve;
+    std::vector<int> screen_size{1400,800};
+	Player steve;
+    Scene scene;
+    Rasterizer rasterizer;
+    sf::CircleShape gunsight;
+    sf::Text test;
+    sf::Font font;
+    long long tick;
 	Game(std::vector<int> input)
 	{
 		std::cout << "You're welcome!" << std::endl;
 		if (input.size() == 2)
 		{
 			screen_size = input;
-            Player Steve(screen_size);
+            steve = Player(screen_size);
 		}
 		else
 		{
@@ -799,98 +915,135 @@ public:
 	{
 		std::cout << "Thanks!" << std::endl;
 	};
+
+    void Loop_init()
+    {
+        gunsight.setRadius(5);
+        gunsight.setFillColor(sf::Color::Transparent);
+        gunsight.setOutlineThickness(1.5f);
+        gunsight.setPosition(static_cast<int>(screen_size[0] / 2.0f) - gunsight.getRadius(), static_cast<int>(screen_size[1] / 2.0f) - gunsight.getRadius());
+        font.loadFromFile("fonts/arial.ttf");
+        test.setFont(font);
+        test.setFillColor(sf::Color::Black);
+        test.setCharacterSize(24);
+        test.setPosition(sf::Vector2f(0, 64));
+        test.setString("Loop was initialized");
+        std::cout << "Loop was initialized" << std::endl;
+    }
 	void Loop()
 	{
-		sf::RenderWindow window(sf::VideoMode(screen_size[0], screen_size[1]), "Vfqyrhfan");
-		window.setFramerateLimit(FPS);
-		/*
-		while running:
-			for event in pygame.event.get():
-				constr = player.update(event, scene, rasterizer.fat)
-			player.move(order_of_tuk.order, ground, scene)
+        sf::RenderWindow window(sf::VideoMode(screen_size[0], screen_size[1]), "Vfqyrhfan");
+		//window.setFramerateLimit(FPS);
+        Loop_init();
+        sf::Event evnt;
+        auto ticker = 0ull;
+        while (window.isOpen())
+        {            
+            ticker++;
+            if (ticker % 100 == 0)
+            {
+                std::cout << "Window is still open." << std::endl;
+            }
+            double constr = 0;
+            //false == 0
+            while (window.pollEvent(evnt))
+            {
+                constr = steve.update(evnt, scene, rasterizer.fat);
+                sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(screen_size[0] / 2.0f), static_cast<int>(screen_size[1] / 2.0f)), window);
+                if (evnt.type == sf::Event::Closed)
+                {
+                    window.close();
+                }
+            };
+            steve.move(order_of_tuk, ground, scene);
+            //rasterizer.draw(screen, scene, //player_get_camera = player.get_camera()//, constr);
+            window.clear(BACKGROUND);
+            //constr = False;
+            constr = 0;            
+            window.draw(gunsight);
 
-			rasterizer.draw(screen, scene, //player_get_camera = player.get_camera()//, constr)
-			constr = False
-			gui(player.color)
-			pygame.display.update()
+            GUI(get_color(steve.color));
+            window.draw(test);
+            window.display();
+        };
+    }
 
-		*/
-		float precision = 0;
-		float recLevel = 0;
-		while (window.isOpen())
-		{
-			
-			
-			sf::CircleShape gunsight;
-			gunsight.setRadius(5);
-			gunsight.setOutlineColor(sf::Color::Red);
-			gunsight.setFillColor(sf::Color::Transparent);
-			gunsight.setOutlineThickness(1.5f);
-			gunsight.setPosition(static_cast<int>(screen_size[0] / 2.0f) - gunsight.getRadius(), static_cast<int>(screen_size[1] / 2.0f) - gunsight.getRadius());
+    void text_render()
+    /*
+    Функция, отрисовывающая текст
+    :param scrn: поверхность для вывода
+    :param nm: текст для вывода
+    :param point_x: абсцисса левой верхней точки поверхности
+    :param point_y: ордината левой верхней точки поверхности
+    :return: ---
+    */
+    {
+    
+
+    //realtime_name_font = pygame.font.SysFont("", 30)
+    //realtime_name_texture = realtime_name_font.render(nm, False, BLACK)
+    //scrn.blit(realtime_name_texture, (point_x, point_y))
+    };
 
 
-			sf::Font font;
-			font.loadFromFile("fonts/arial.ttf");
+    void coords(Player player)
+    /*
+    отладочная функция, выводит на экран основные переменные отвечающие за положение и перемещение
+    return : None
+    */
+    {
+        if (player.test_mode || true)
+        {
+            std::string out = "";
+            out.append("Tick/100 = " + std::to_string(static_cast<double>(tick) / 100.f));
+            tick++;
+            out.push_back('\n');
+            out.append("x = " + std::to_string(player.r[0]));
+            out.push_back('\n');
+            out.append("y = " + std::to_string(player.r[1]));
+            out.push_back('\n');
+            out.append("z = " + std::to_string(player.r[2]));
+            out.push_back('\n');
+            out.append("vx = " + std::to_string(player.v[0] * 10));
+            out.push_back('\n');
+            out.append("vy = " + std::to_string(player.v[1] * 10));
+            out.push_back('\n');
+            out.append("vz = " + std::to_string(player.v[2] * 10));
+            out.push_back('\n');
+            out.append("ax = " + std::to_string(player.a[0] * 100));
+            out.push_back('\n');
+            out.append("ay = " + std::to_string(player.a[1] * 100));
+            out.push_back('\n');
+            out.append("az = " + std::to_string(player.a[2] * 100));
+            out.push_back('\n');
+            out.append("an_xy = " + std::to_string(player.lng));
+            out.push_back('\n');
+            out.append("an_xz = " + std::to_string(player.lat));
+            out.push_back('\n');
+            out.append("fly_mode = " + std::to_string(player.fly_mode));
+            out.push_back('\n');
+            test.setString(out);
+        }
+        else
+        {
+            test.setString("Test mode is off");
+        }
+    }
 
-
-			sf::Text zoomText, precText;
-			zoomText.setFont(font);
-			precText.setFont(font);
-			zoomText.setFillColor(sf::Color::Black);
-			precText.setFillColor(sf::Color::Black);
-			zoomText.setCharacterSize(24);
-			precText.setCharacterSize(24);
-			zoomText.setString("Zoom: " + std::to_string(pow(8, recLevel - 1)));
-			precText.setString("Max. Iterations: " + std::to_string(precision));
-			precText.setPosition(sf::Vector2f(0, 32));
-			sf::Color const BACKGROUND = sf::Color(180, 180, 180, 0);
-			// TO-DO: move to vocabulary
-			sf::Event evnt;
-			while (window.pollEvent(evnt))
-			{
-
-			}
-			if (evnt.type == sf::Event::MouseWheelScrolled)
-			{
-				if (evnt.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
-					std::cout << "wheel type: vertical" << std::endl;
-				else if (evnt.mouseWheelScroll.wheel == sf::Mouse::HorizontalWheel)
-					std::cout << "wheel type: horizontal" << std::endl;
-				else
-					std::cout << "wheel type: unknown" << std::endl;
-				std::cout << "wheel movement: " << evnt.mouseWheelScroll.delta << std::endl;
-				std::cout << "mouse x: " << evnt.mouseWheelScroll.x << std::endl;
-				std::cout << "mouse y: " << evnt.mouseWheelScroll.y << std::endl;
-			}
-			if (evnt.type == sf::Event::MouseMoved)
-			{
-				std::cout << "new mouse x: " << evnt.mouseMove.x << std::endl;
-				std::cout << "new mouse y: " << evnt.mouseMove.y << std::endl;
-			}
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-			{
-				
-			}
-			std::cout << "precision: " << precision << std::endl;
-			window.clear(BACKGROUND);
-			window.draw(zoomText);
-			window.draw(precText);
-			window.draw(gunsight);
-			window.display();
-		}
-		//void GUI(sf::Color color){
-			/*
-			graphic user interface
-			отвечает за вывод информации для тестера на экран, за кружочек в центре экрана
-			color : цвет в формате от 1 до 8
-			return : None
-			*/
-			//w, h = self.screen.get_clip().size
-			//circle(self.screen, get_color(color), (w / 2, h / 2), 6, 2)
-			//coords(self.screen, self.player, self.clock.get_fps())
-
-		//};
-	}
+	void GUI(sf::Color color)
+	/*
+	graphic user interface
+	отвечает за вывод информации для тестера на экран, за кружочек в центре экрана
+	color : цвет в формате от 1 до 8
+	return : None
+	*/
+    {
+        int w = screen_size[0];
+        int h = screen_size[1];
+		//circle(self.screen, get_color(color), (w / 2, h / 2), 6, 2)
+        //gunsight.setOutlineColor(color);
+        coords(steve);
+	};
 
 private:
 
@@ -898,11 +1051,7 @@ private:
 
 int main()
 {
-	
-	const int WIDTH = 1400;
-	const int HEIGHT = 750;
-	std::vector<int> screen_size = { 1400, 750 };
-	Game Minecraft(screen_size);
+    Game Minecraft(screen_size);
 	Minecraft.Loop();
 	return 0;
 }

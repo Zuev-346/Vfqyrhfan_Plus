@@ -2,6 +2,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #define M_PI  3.14159265358979323846
 
@@ -571,7 +572,7 @@ public:
     int ground = 9;
     // 0 == false
 
-    std::vector<sf::Keyboard::Key> control_keys = { sf::Keyboard::A, sf::Keyboard::W, sf::Keyboard::S, sf::Keyboard::D, sf::Keyboard::Space };
+    std::vector<sf::Keyboard::Key> control_keys = { sf::Keyboard::A, sf::Keyboard::W, sf::Keyboard::S, sf::Keyboard::D, sf::Keyboard::Space, sf::Keyboard::C, sf::Keyboard::T };
     std::vector<sf::Keyboard::Key> pressed_keys;
     //1 == true
     //TO-DO: move to vocabulary
@@ -636,21 +637,22 @@ public:
     {
         double const_1 = 0;
         //false == 0
-        pressed_keys.clear();
-        for (sf::Keyboard::Key item : control_keys)
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::C))
-                pressed_keys.push_back(item);
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::C))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::C) && not(std::find(pressed_keys.begin(), pressed_keys.end(), sf::Keyboard::C) != pressed_keys.end()))
         {
-                fly_mode = not fly_mode;
+            fly_mode = not fly_mode;
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::T))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::T) && not(std::find(pressed_keys.begin(), pressed_keys.end(), sf::Keyboard::T) != pressed_keys.end()))
         {
             test_mode = not test_mode;
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) and not fly_mode)
-            jump();
+        pressed_keys.clear();
+        for (sf::Keyboard::Key item : control_keys)
+            if (sf::Keyboard::isKeyPressed(item))
+                pressed_keys.push_back(item);
+
+        /*
+
         
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
@@ -665,11 +667,14 @@ public:
             //true == 1
             r[0] += 10.f;
         }
-        
+        */
         if (event.type == sf::Event::MouseWheelScrolled)
         {
             if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
+            {
+                std::cout << "Wheel scrolled" << std::endl;
                 change_color(static_cast<int>(event.mouseWheelScroll.delta));
+            }
         }
         else if (event.type == sf::Event::MouseMoved)
         {
@@ -711,7 +716,7 @@ public:
         */
     {
 
-        std::cout << "move_beginning" << std::endl;
+        //std::cout << "move_beginning" << std::endl;
 
         double v_horizontal = sqrt(v[0] * v[0] + v[1] * v[1]);
         if (v_horizontal > speed_limit_min)
@@ -731,6 +736,9 @@ public:
 
         for (sf::Keyboard::Key key : pressed_keys)
         {
+
+            if ((key == sf::Keyboard::Space) and not fly_mode)
+                jump();
             if (key == sf::Keyboard::D)
             {
                 std::cout << "pressed_keys_D: " << "D" << std::endl;
@@ -755,7 +763,7 @@ public:
                 a[0] += +leg_force * cos(lng);
                 a[1] += +leg_force * sin(lng);
             }
-            else if (key == sf::Keyboard::Space and fly_mode)
+            else if (key == sf::Keyboard::Space && fly_mode)
             {
 
                 std::cout << "pressed_keys_Space+flymode: " << "Space+flymode" << std::endl;
@@ -933,6 +941,7 @@ public:
 	void Loop()
 	{
         sf::RenderWindow window(sf::VideoMode(screen_size[0], screen_size[1]), "Vfqyrhfan");
+        window.setKeyRepeatEnabled(false);
 		//window.setFramerateLimit(FPS);
         Loop_init();
         sf::Event evnt;
@@ -942,7 +951,7 @@ public:
             ticker++;
             if (ticker % 100 == 0)
             {
-                std::cout << "Window is still open." << std::endl;
+                //std::cout << "Burger king govno" << std::endl;
             }
             double constr = 0;
             //false == 0
@@ -992,7 +1001,7 @@ public:
     return : None
     */
     {
-        if (player.test_mode || true)
+        if (player.test_mode)
         {
             std::string out = "";
             out.append("Tick/100 = " + std::to_string(static_cast<double>(tick) / 100.f));
